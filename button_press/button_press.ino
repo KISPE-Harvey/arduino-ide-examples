@@ -28,11 +28,11 @@ void loop() {
 
   if (state == false){
 
-    Serial.println("LOW");
+    Serial.println("NOT PRESSED");
 
   } else if (state == true){
 
-    Serial.println("HIGH");
+    Serial.println("PRESSED");
 
   }
 
