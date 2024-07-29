@@ -30,3 +30,14 @@ For uploading to the Nucleo board it requires a few extra steps
 Using the standard Mass storage option makes the compter see the board as removable drive and does not enable the serial port when plugged in.
 
 - Plug in the standard USB to the nucleo board and select the COM port for the onboard ST-LINK. There should now be serial outputs. This can work with the external ST-LINK connected, just the correct COM port needs to be selected.
+
+## KISPE Logo
+```
+ _  _______  _____ _____  ______ 
+| |/ /_   _|/ ____|  __ \|  ____|
+| ' /  | | | (___ | |__) | |__
+|  <   | |  \___ \|  ___/|  __|  
+| . \ _| |_ ____) | |    | |____ 
+|_|\_\_____|_____/|_|    |______| 
+```
+
