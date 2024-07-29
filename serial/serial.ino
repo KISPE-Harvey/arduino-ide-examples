@@ -39,8 +39,10 @@ void setup() {
 }
 
 void loop() {
+
   Serial.print("Hello World ");Serial.println(number);
   number = number + 1;
+  // Prints to the serial port with a counter to show its working
 
   delay(1000);
 }
