@@ -1,6 +1,8 @@
 # Arduino IDE Examples
 Example code for stm32 board in the Arduino IDE using the KISPE Board Manager
 
+https://raw.githubusercontent.com/KISPE-Harvey/kispe-boardmanager/main/stm32/package_KISPE_index.json
+
 ## Serial
 Example to use the serial port
 
