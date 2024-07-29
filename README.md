@@ -40,4 +40,16 @@ Using the standard Mass storage option makes the compter see the board as remova
 | . \ _| |_ ____) | |    | |____ 
 |_|\_\_____|_____/|_|    |______| 
 ```
-
+code to print in Arduino IDE - as // will print just /
+```
+  Serial.println("------------------------------------------------"); 
+  Serial.println();
+  Serial.println("  _  _______  _____ _____  ______ ");
+  Serial.println(" | |/ /_   _|/ ____|  __ \\|  ____|");
+  Serial.println(" | ' /  | | | (___ | |__) | |__   ");
+  Serial.println(" |  <   | |  \\___ \\|  ___/|  __|  ");
+  Serial.println(" | . \\ _| |_ ____) | |    | |____ ");
+  Serial.println(" |_|\\_\\_____|_____/|_|    |______|");
+  Serial.println();
+  Serial.println("------------------------------------------------");
+```
