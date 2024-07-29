@@ -12,7 +12,7 @@
   ____) | |  / ____ \ |____| |____ 
  |_____/|_| /_/    \_\_____|______|                         
 
-  Development and test code for the STM32h753ZIT uC
+  Development and test code for the STM32H753ZIT uC
 
 
   STM32H7 line has a 16-bit ADC
