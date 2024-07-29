@@ -20,6 +20,17 @@
   This mean that it will map voltages between 0v and 3.3v 
   with readings showing between 0 and 65,535 or 2^16
 
+  Pinname  - STM32 Pin - ADC
+  A0 - PA3      -    ADC1/2
+  A1 - PC0      -    ADC1/2/3
+  A2 - PC3      -    ADC1/2
+  A3 - PB1      -    ADC1/2
+  A4 - PC2/PB9  -    ADC1/2/3
+  A5 - PF10/PB8 -    ADC3
+  A6 - PF4      -    ADC3
+  A7 - PF5      -    ADC3
+  A8 - PF6      -    ADC3
+
 */
 
 void setup() {
