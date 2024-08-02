@@ -145,35 +145,35 @@ void loop() {
       frame.id &= 0x7FFU ;
     }
     switch (frame.type) {
-    case CANFDMessage::CAN_REMOTE :
-      gCANRemoteFrameCount += 1 ;
-      frame.len = pseudoRandomValue () % 9 ;
-      break ;
+    // case CANFDMessage::CAN_REMOTE :
+    //   gCANRemoteFrameCount += 1 ;
+    //   frame.len = pseudoRandomValue () % 9 ;
+    //   break ;
     case CANFDMessage::CAN_DATA :
       gCanDataFrameCount += 1 ;
-      frame.len = pseudoRandomValue () % 9 ;
-      frame.len = 5;
+      //frame.len = pseudoRandomValue () % 9 ;
+      frame.len = 5; // random number between 1 and 8 
       for (uint32_t i=0 ; i<frame.len ; i++) {
         //frame.data [i] = uint8_t (pseudoRandomValue ()) ;
         frame.data [i] = uint8_t (i) ;
       }
-      break ;
-    case CANFDMessage::CANFD_NO_BIT_RATE_SWITCH :
-      gCanFDNoBRSDataFrameCount += 1 ;
-      frame.len = CANFD_LENGTH_FROM_CODE [pseudoRandomValue () & 0xF] ;
-      for (uint32_t i=0 ; i<frame.len ; i++) {
-        frame.data [i] = uint8_t (pseudoRandomValue ()) ;
-        //frame.data [i] = uint8_t (i) ;
-      }
-      break ;
-    case CANFDMessage::CANFD_WITH_BIT_RATE_SWITCH :
-      gCanFDWithBRSDataFrameCount += 1 ;
-      frame.len = CANFD_LENGTH_FROM_CODE [pseudoRandomValue () & 0xF] ;
-      for (uint32_t i=0 ; i<frame.len ; i++) {
-        frame.data [i] = uint8_t (pseudoRandomValue ()) ;
-        //frame.data [i] = uint8_t (i) ;
-      }
-      break ;
+    break ;
+    // case CANFDMessage::CANFD_NO_BIT_RATE_SWITCH :
+    //   gCanFDNoBRSDataFrameCount += 1 ;
+    //   frame.len = CANFD_LENGTH_FROM_CODE [pseudoRandomValue () & 0xF] ;
+    //   for (uint32_t i=0 ; i<frame.len ; i++) {
+    //     frame.data [i] = uint8_t (pseudoRandomValue ()) ;
+    //     //frame.data [i] = uint8_t (i) ;
+    //   }
+    //   break ;
+    // case CANFDMessage::CANFD_WITH_BIT_RATE_SWITCH :
+    //   gCanFDWithBRSDataFrameCount += 1 ;
+    //   frame.len = CANFD_LENGTH_FROM_CODE [pseudoRandomValue () & 0xF] ;
+    //   for (uint32_t i=0 ; i<frame.len ; i++) {
+    //     frame.data [i] = uint8_t (pseudoRandomValue ()) ;
+    //     //frame.data [i] = uint8_t (i) ;
+    //   }
+    //   break ;
     }
     //gBuffer.append (frame) ;
     const uint32_t sendStatus = fdcan1.tryToSendReturnStatusFD (frame) ;
