@@ -27,6 +27,7 @@ static const uint32_t FDCAN2_MESSAGE_RAM_WORD_SIZE = 0 ; // FDCAN2 not used
 static ACANFD_STM32_FIFO gBuffer ;
 
 int datatype = 1;
+int counter =0;
 float send_data;
 float pressure = 1120.64;
 float temperature = 21.25;
@@ -46,7 +47,7 @@ static uint32_t gCanFDWithBRSDataFrameCount = 0 ;
 static uint32_t gStandardFrameCount = 0 ;
 static uint32_t gExtendedFrameCount = 0 ;
 
-uint32_t interval = 1000; // time between sending out in ms - basically like delay() but doesnt freeze everything
+uint32_t interval = 3000;//1000; // time between sending out in ms - basically like delay() but doesnt freeze everything
 uint32_t currentMillis, prevMillis = 0;
 
 char str_data[8];
@@ -67,7 +68,7 @@ void setup() {
   Serial.begin (115200);
   delay(2000);
   
-  Serial.println("------------------------------------------------"); 
+  Serial.println("------------------------------------------------------------------------------");
   Serial.println();
   Serial.println("  _  _______  _____ _____  ______ ");
   Serial.println(" | |/ /_   _|/ ____|  __ \\|  ____|");
@@ -76,7 +77,7 @@ void setup() {
   Serial.println(" | . \\ _| |_ ____) | |    | |____ ");
   Serial.println(" |_|\\_\\_____|_____/|_|    |______|");
   Serial.println();
-  Serial.println("------------------------------------------------");
+  Serial.println("------------------------------------------------------------------------------");
   Serial.println("    CAN FD Transmit Example");
   delay(2000);
 
@@ -196,7 +197,10 @@ void loop() {
 } // END of Loop()
 
 void data(){
-  uSerial.print("Data Type: ");Serial.println(datatype);
+  ++counter;
+  Serial.println("------------------------------------------------------------------------------");
+  Serial.print("Packet: ");Serial.println(counter);
+  Serial.print("Data Type: ");Serial.println(datatype);
   floatToCharArray(send_data, str_data, sizeof(str_data), 8, 6);
 
   const uint8_t sendBufferIndex = 0 ;
@@ -213,12 +217,20 @@ void data(){
 
     //for (int i = 0; str_data[i] != '\0'; i++){
     //for (int i = 0; i < sizeof(frame.len) ; i++){
-      for (int i = 0; i < 8 ; i++){
+
+  for (int i = 0; i < 8 ; i++){
     Serial.print("Character ");
     Serial.print(i);
     Serial.print(": ");
     Serial.println(str_data[i]);
   }
+  Serial.print("Data: ");
+  for (int i = 0; i < 8 ; i++){
+    Serial.print(str_data[i]);
+    Serial.print("\t");
+  }
+  Serial.println();
+  Serial.print("Ascii: ");
 
 
   // Layout the frame structure
@@ -288,13 +300,15 @@ void data(){
     Serial.print("\t");
   }
   Serial.println();      
-  Serial.print("|---ID--|");Serial.print("|---LENGTH---|");Serial.println("|----------------------------DATA---------------------------|");
+  Serial.print("|---ID--|");Serial.print("|---LENGTH---|");Serial.println("|-------------------------DATA------------------------|");
   Serial.print("   ");Serial.print(frame.id);Serial.print("\t");Serial.print("\t");Serial.print(frame.len);Serial.print("\t");
   for (int i = 0; i < frame.len; i++){
+    Serial.print("0x");
     Serial.print(frame.data[i],HEX);
-    Serial.print("\t");
+    Serial.print("   ");
   }
   Serial.println();
+  Serial.println("------------------------------------------------------------------------------");
 
       // const uint32_t sendStatus = fdcan1.tryToSendReturnStatusFD (frame) ;
       // if (sendStatus == 0) {
