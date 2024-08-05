@@ -231,7 +231,8 @@ void data(){
     Serial.print("\t");
   }
   Serial.println();
-  Serial.print("Ascii: ");
+
+
 
 
   // Layout the frame structure
@@ -295,11 +296,19 @@ void data(){
       //   break ;
       }
       //gBuffer.append (frame) ;
-      // print the CAN frame
-  for (int i = 0; i < frame.len; i++){
-    Serial.print(frame.data[i]);
-    Serial.print("\t");
-  }
+
+  // print the CAN frame
+    Serial.print("Ascii: ");
+    for (int i = 0; i < frame.len; i++){
+      Serial.print(frame.data[i]);
+      Serial.print("\t");
+    }
+
+
+      Serial.println();
+     const uint32_t sendStatus = fdcan1.tryToSendReturnStatusFD (frame) ;  
+
+
   Serial.println();      
   Serial.print("|---ID--|");Serial.print("|---LENGTH---|");Serial.println("|-------------------------DATA------------------------|");
   Serial.print("   ");Serial.print(frame.id);Serial.print("\t");Serial.print("\t");Serial.print(frame.len);Serial.print("\t");
@@ -310,6 +319,17 @@ void data(){
   }
   Serial.println();
   Serial.println("------------------------------------------------------------------------------");
+  Serial.println();  
+    if (sendStatus == 0) {
+      gSentCount += 1 ;
+      Serial.print("SENT Packet:");Serial.println(counter);
+    }else{
+      gOk = false ;
+      Serial.print ("Send status error 0x") ;
+      Serial.println (sendStatus, HEX) ;
+    }
+  Serial.println();
+
 
       // const uint32_t sendStatus = fdcan1.tryToSendReturnStatusFD (frame) ;
       // if (sendStatus == 0) {
@@ -323,3 +343,4 @@ void data(){
 
 
 } //end of data
+
