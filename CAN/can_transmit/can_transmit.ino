@@ -14,7 +14,7 @@
 
   Development and test code for the STM32H753ZIT uC
 
-  Last updated 02/08/2024 Harvey Nixon
+  Last updated 05/08/2024 Harvey Nixon
 */
 #define CAN1_TX_PIN PD_1
 #define CAN1_RX_PIN PD_0
@@ -25,6 +25,41 @@ static const uint32_t FDCAN2_MESSAGE_RAM_WORD_SIZE = 0 ; // FDCAN2 not used
 #include <ACANFD_STM32.h>
 
 static ACANFD_STM32_FIFO gBuffer ;
+
+int datatype = 1;
+float send_data;
+float pressure = 1120.64;
+float temperature = 21.25;
+float accelerationX = 9.81;
+float accelerationY = -0.12;
+float accelerationZ = 0.10;
+
+static const uint32_t PERIOD = 5000 ;
+static uint32_t gBlinkDate = PERIOD ;
+static uint32_t gSentCount = 0 ;
+static uint32_t gReceiveCount = 0 ;
+static bool gOk = true ;
+static uint32_t gCANRemoteFrameCount = 0 ;
+static uint32_t gCanDataFrameCount = 0 ;
+static uint32_t gCanFDNoBRSDataFrameCount = 0 ;
+static uint32_t gCanFDWithBRSDataFrameCount = 0 ;
+static uint32_t gStandardFrameCount = 0 ;
+static uint32_t gExtendedFrameCount = 0 ;
+
+uint32_t interval = 1000; // time between sending out in ms - basically like delay() but doesnt freeze everything
+uint32_t currentMillis, prevMillis = 0;
+
+char str_data[8];
+
+void floatToCharArray(float value, char* buffer, int bufferSize, int width, int precision){
+  dtostrf(value, width, precision, buffer);
+}
+
+static uint32_t pseudoRandomValue (void) {
+  static uint32_t gSeed = 0 ;
+  gSeed = 8253729U * gSeed + 2396403U ;
+  return gSeed ;
+}
 
 void setup() {
   gBuffer.initWithSize (100) ;
@@ -121,73 +156,155 @@ void setup() {
 //   } ;
 
 void loop() {
+  currentMillis = millis();
+
+  if (currentMillis - prevMillis > interval){
+
+  // data
+  switch(datatype){
+    case 1: 
+      send_data = pressure;
+      data();
+      break;
+    case 2:
+      send_data = temperature;
+      data();
+      break;
+    case 3:
+      send_data = accelerationX;
+      data();
+      break;
+    case 4: 
+      send_data = accelerationY;
+      data();
+      break;
+    case 5:
+      send_data = accelerationZ;
+      data();
+      break;
+    case 6:
+    datatype = 0;
+    break;
+    }
+    ++datatype; 
+
+
+ 
+      prevMillis = currentMillis;
+  }// END of interval
+
+} // END of Loop()
+
+void data(){
+  uSerial.print("Data Type: ");Serial.println(datatype);
+  floatToCharArray(send_data, str_data, sizeof(str_data), 8, 6);
 
   const uint8_t sendBufferIndex = 0 ;
-//--- Send frame
-    CANFDMessage frame ;
-    // Layout the frame structure
-    // ID, FRAMEs ETC
+  
+  //--- Send frame
+  CANFDMessage frame ;
+  // set can frame data to all 0s
+  for (uint32_t i=0 ; i<frame.len ; i++) {
+    //frame.data [i] = uint8_t (pseudoRandomValue ()) ;
+    frame.data [i] = 0 ;
+    // this is where the data is 
+    // going to create a loop to send data
+    }
 
-    frame.idx = sendBufferIndex ;
-    const uint32_t r = pseudoRandomValue () ;
-    frame.ext = (r & (1 << 29)) != 0 ;
-    frame.ext = (0) ;
-    frame.type = CANFDMessage::Type (1);
-    //frame.type = CANFDMessage::Type (r << 30) ;
-    //frame.type = CANFDMessage::CANFD_NO_BIT_RATE_SWITCH  ;
-    //frame.id = & r 0x1FFFFFFFU ;
-    frame.id = 0x1FFFFFFFU ;
-  if (gOk && (!gBuffer.isFull ()) && fdcan1.sendBufferNotFullForIndex (sendBufferIndex)) {
-    if (frame.ext) {
-      gExtendedFrameCount += 1 ;
-    }else{
-      gStandardFrameCount += 1 ;
-      frame.id &= 0x7FFU ;
-    }
-    switch (frame.type) {
-    // case CANFDMessage::CAN_REMOTE :
-    //   gCANRemoteFrameCount += 1 ;
-    //   frame.len = pseudoRandomValue () % 9 ;
-    //   break ;
-    case CANFDMessage::CAN_DATA :
-      gCanDataFrameCount += 1 ;
-      //frame.len = pseudoRandomValue () % 9 ;
-      frame.len = 5; // random number between 1 and 8 
-      for (uint32_t i=0 ; i<frame.len ; i++) {
-        //frame.data [i] = uint8_t (pseudoRandomValue ()) ;
-        frame.data [i] = uint8_t (i) ;
-      }
-    break ;
-    // case CANFDMessage::CANFD_NO_BIT_RATE_SWITCH :
-    //   gCanFDNoBRSDataFrameCount += 1 ;
-    //   frame.len = CANFD_LENGTH_FROM_CODE [pseudoRandomValue () & 0xF] ;
-    //   for (uint32_t i=0 ; i<frame.len ; i++) {
-    //     frame.data [i] = uint8_t (pseudoRandomValue ()) ;
-    //     //frame.data [i] = uint8_t (i) ;
-    //   }
-    //   break ;
-    // case CANFDMessage::CANFD_WITH_BIT_RATE_SWITCH :
-    //   gCanFDWithBRSDataFrameCount += 1 ;
-    //   frame.len = CANFD_LENGTH_FROM_CODE [pseudoRandomValue () & 0xF] ;
-    //   for (uint32_t i=0 ; i<frame.len ; i++) {
-    //     frame.data [i] = uint8_t (pseudoRandomValue ()) ;
-    //     //frame.data [i] = uint8_t (i) ;
-    //   }
-    //   break ;
-    }
-    //gBuffer.append (frame) ;
-    const uint32_t sendStatus = fdcan1.tryToSendReturnStatusFD (frame) ;
-    if (sendStatus == 0) {
-      gSentCount += 1 ;
-    }else{
-      gOk = false ;
-      Serial.print ("Send status error 0x") ;
-      Serial.println (sendStatus, HEX) ;
-    }
+    //for (int i = 0; str_data[i] != '\0'; i++){
+    //for (int i = 0; i < sizeof(frame.len) ; i++){
+      for (int i = 0; i < 8 ; i++){
+    Serial.print("Character ");
+    Serial.print(i);
+    Serial.print(": ");
+    Serial.println(str_data[i]);
   }
 
 
+  // Layout the frame structure
+  // ID, FRAMEs ETC
+  frame.idx = sendBufferIndex ;
+
+  const uint32_t r = pseudoRandomValue () ;
+  
+  //   public : bool ext = false ; // false -> standard frame, true -> extended frame
+  //frame.ext = (r & (1 << 29)) != 0 ; 
+  frame.ext = (0) ;
+
+  // state where is in and what it means
+  frame.type = CANFDMessage::Type (1);
+  
+    //frame.type = CANFDMessage::Type (r << 30) ;
+    //frame.type = CANFDMessage::CANFD_NO_BIT_RATE_SWITCH  ;
+    //frame.id = & r 0x1FFFFFFFU ;
+  //   public : uint32_t id = 0 ;  // Frame identifier  
+  frame.id = 0x1FFFFFFFU ;
+
+   // if (gOk && (!gBuffer.isFull ()) && fdcan1.sendBufferNotFullForIndex (sendBufferIndex)) {
+      if (frame.ext) {
+        gExtendedFrameCount += 1 ;
+      }else{
+        gStandardFrameCount += 1 ;
+        frame.id &= 0x7FFU ;
+      }
+      switch (frame.type) {
+      // case CANFDMessage::CAN_REMOTE :
+      //   gCANRemoteFrameCount += 1 ;
+      //   frame.len = pseudoRandomValue () % 9 ;
+      //   break ;
+      case CANFDMessage::CAN_DATA :
+        gCanDataFrameCount += 1 ;
+        //frame.len = pseudoRandomValue () % 9 ;
+        frame.len = 8; // random number between 1 and 8 
+        for (uint32_t i=0 ; i<frame.len ; i++) {
+          //frame.data [i] = uint8_t (pseudoRandomValue ()) ;
+          //frame.data [i] = uint8_t (i) ;
+          frame.data[i] = str_data[i];
+          // this is where the data is 
+          // going to create a loop to send data
+        }
+      break ;
+      // case CANFDMessage::CANFD_NO_BIT_RATE_SWITCH :
+      //   gCanFDNoBRSDataFrameCount += 1 ;
+      //   frame.len = CANFD_LENGTH_FROM_CODE [pseudoRandomValue () & 0xF] ;
+      //   for (uint32_t i=0 ; i<frame.len ; i++) {
+      //     frame.data [i] = uint8_t (pseudoRandomValue ()) ;
+      //     //frame.data [i] = uint8_t (i) ;
+      //   }
+      //   break ;
+      // case CANFDMessage::CANFD_WITH_BIT_RATE_SWITCH :
+      //   gCanFDWithBRSDataFrameCount += 1 ;
+      //   frame.len = CANFD_LENGTH_FROM_CODE [pseudoRandomValue () & 0xF] ;
+      //   for (uint32_t i=0 ; i<frame.len ; i++) {
+      //     frame.data [i] = uint8_t (pseudoRandomValue ()) ;
+      //     //frame.data [i] = uint8_t (i) ;
+      //   }
+      //   break ;
+      }
+      //gBuffer.append (frame) ;
+      // print the CAN frame
+  for (int i = 0; i < frame.len; i++){
+    Serial.print(frame.data[i]);
+    Serial.print("\t");
+  }
+  Serial.println();      
+  Serial.print("|---ID--|");Serial.print("|---LENGTH---|");Serial.println("|----------------------------DATA---------------------------|");
+  Serial.print("   ");Serial.print(frame.id);Serial.print("\t");Serial.print("\t");Serial.print(frame.len);Serial.print("\t");
+  for (int i = 0; i < frame.len; i++){
+    Serial.print(frame.data[i],HEX);
+    Serial.print("\t");
+  }
+  Serial.println();
+
+      // const uint32_t sendStatus = fdcan1.tryToSendReturnStatusFD (frame) ;
+      // if (sendStatus == 0) {
+      //   gSentCount += 1 ;
+      // }else{
+      //   gOk = false ;
+      //   Serial.print ("Send status error 0x") ;
+      //   Serial.println (sendStatus, HEX) ;
+      // }
+   // }
 
 
-
-} // END of Loop()
+} //end of data
