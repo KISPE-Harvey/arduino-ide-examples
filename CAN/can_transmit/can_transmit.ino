@@ -311,7 +311,7 @@ void data(){
 
   Serial.println();      
   Serial.print("|---ID--|");Serial.print("|---LENGTH---|");Serial.println("|-------------------------DATA------------------------|");
-  Serial.print("   ");Serial.print(frame.id);Serial.print("\t");Serial.print("\t");Serial.print(frame.len);Serial.print("\t");
+  Serial.print("   ");Serial.print(frame.id, HEX);Serial.print("\t");Serial.print("\t");Serial.print(frame.len);Serial.print("\t");
   for (int i = 0; i < frame.len; i++){
     Serial.print("0x");
     Serial.print(frame.data[i],HEX);
