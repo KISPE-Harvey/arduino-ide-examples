@@ -228,7 +228,7 @@ void data(){
   Serial.print("\t");
   for (int i = 0; i < 8 ; i++){
     Serial.print(str_data[i]);
-    Serial.print(" ");Serial.print("\t");
+    Serial.print("\t");
   }
   Serial.println();
   Serial.print("Ascii: ");
