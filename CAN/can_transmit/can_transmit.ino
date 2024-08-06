@@ -117,9 +117,9 @@ void setup() {
 
   const uint32_t errorCode = fdcan1.beginFD (settings) ;
 
-  Serial.print ("Message RAM required minimum size: ") ;
-  Serial.print (fdcan1.messageRamRequiredMinimumSize ()) ;
-  Serial.println (" words") ;
+  // Serial.print ("Message RAM required minimum size: ") ;
+  // Serial.print (fdcan1.messageRamRequiredMinimumSize ()) ;
+  // Serial.println (" words") ;
  
  if (0 == errorCode) {
     Serial.println ("can configuration ok") ;
@@ -273,27 +273,11 @@ void data(){
         for (uint32_t i=0 ; i<frame.len ; i++) {
           //frame.data [i] = uint8_t (pseudoRandomValue ()) ;
           //frame.data [i] = uint8_t (i) ;
-          frame.data[i] = str_data[i];
+          frame.data[i] = str_data[i,HEX];
           // this is where the data is 
           // going to create a loop to send data
         }
       break ;
-      // case CANFDMessage::CANFD_NO_BIT_RATE_SWITCH :
-      //   gCanFDNoBRSDataFrameCount += 1 ;
-      //   frame.len = CANFD_LENGTH_FROM_CODE [pseudoRandomValue () & 0xF] ;
-      //   for (uint32_t i=0 ; i<frame.len ; i++) {
-      //     frame.data [i] = uint8_t (pseudoRandomValue ()) ;
-      //     //frame.data [i] = uint8_t (i) ;
-      //   }
-      //   break ;
-      // case CANFDMessage::CANFD_WITH_BIT_RATE_SWITCH :
-      //   gCanFDWithBRSDataFrameCount += 1 ;
-      //   frame.len = CANFD_LENGTH_FROM_CODE [pseudoRandomValue () & 0xF] ;
-      //   for (uint32_t i=0 ; i<frame.len ; i++) {
-      //     frame.data [i] = uint8_t (pseudoRandomValue ()) ;
-      //     //frame.data [i] = uint8_t (i) ;
-      //   }
-      //   break ;
       }
       //gBuffer.append (frame) ;
 
@@ -305,8 +289,8 @@ void data(){
     }
 
 
-      Serial.println();
-     const uint32_t sendStatus = fdcan1.tryToSendReturnStatusFD (frame) ;  
+  Serial.println();
+  const uint32_t sendStatus = fdcan1.tryToSendReturnStatusFD (frame) ;  
 
 
   Serial.println();      
@@ -320,7 +304,8 @@ void data(){
   Serial.println();
   Serial.println("------------------------------------------------------------------------------");
   Serial.println();  
-    if (sendStatus == 0) {
+  
+  if (sendStatus == 0) {
       gSentCount += 1 ;
       Serial.print("SENT Packet:");Serial.println(counter);
       Serial.println("------------------------------------------------------------------------------");
@@ -328,20 +313,9 @@ void data(){
       gOk = false ;
       Serial.print ("Send status error 0x") ;
       Serial.println (sendStatus, HEX) ;
+      Serial.println("------------------------------------------------------------------------------");
     }
   Serial.println();
-
-
-      // const uint32_t sendStatus = fdcan1.tryToSendReturnStatusFD (frame) ;
-      // if (sendStatus == 0) {
-      //   gSentCount += 1 ;
-      // }else{
-      //   gOk = false ;
-      //   Serial.print ("Send status error 0x") ;
-      //   Serial.println (sendStatus, HEX) ;
-      // }
-   // }
-
 
 } //end of data
 
