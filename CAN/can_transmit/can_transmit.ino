@@ -323,6 +323,7 @@ void data(){
     if (sendStatus == 0) {
       gSentCount += 1 ;
       Serial.print("SENT Packet:");Serial.println(counter);
+      Serial.println("------------------------------------------------------------------------------");
     }else{
       gOk = false ;
       Serial.print ("Send status error 0x") ;
