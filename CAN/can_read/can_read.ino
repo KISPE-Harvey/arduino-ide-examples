@@ -122,24 +122,32 @@ void loop() {
       }
       //if (!sameFrames) {
         //gOk = false ;
+      Serial.println();
+      Serial.println("------------------------------------------------------------------------------");
+      Serial.println();
+      Serial.println("Reveived: ");
+
         for (uint32_t i=0 ; (i<receivedFrame.len); i++) {
           Serial.print(receivedFrame.data[i] );Serial.print(" ");
         }
-        Serial.println();
+      Serial.println();
+      Serial.println("------------------------------------------------------------------------------");
+      Serial.println();
+
         //Serial.println(String(receivedFrame.data[8]));
-        Serial.println ("Receive error") ;
-        Serial.print ("  IDF: 0x") ;
-        Serial.print (storedFrame.id, HEX) ;
-        Serial.print (" :: 0x") ;
-        Serial.println (receivedFrame.id, HEX) ;
-        Serial.print ("  TYPE: ") ;
-        Serial.print (storedFrame.type) ;
-        Serial.print (" :: ") ;
-        Serial.println (receivedFrame.type) ;
-        Serial.print ("  LENGTH: ") ;
-        Serial.print (storedFrame.len) ;
-        Serial.print (" :: ") ;
-        Serial.println (receivedFrame.len) ;
+        // Serial.println ("Receive error") ;
+        // Serial.print ("  IDF: 0x") ;
+        // Serial.print (storedFrame.id, HEX) ;
+        // Serial.print (" :: 0x") ;
+        // Serial.println (receivedFrame.id, HEX) ;
+        // Serial.print ("  TYPE: ") ;
+        // Serial.print (storedFrame.type) ;
+        // Serial.print (" :: ") ;
+        // Serial.println (receivedFrame.type) ;
+        // Serial.print ("  LENGTH: ") ;
+        // Serial.print (storedFrame.len) ;
+        // Serial.print (" :: ") ;
+        // Serial.println (receivedFrame.len) ;
       }
     //}
   
