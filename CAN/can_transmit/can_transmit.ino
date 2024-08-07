@@ -14,7 +14,7 @@
 
   Development and test code for the STM32H753ZIT uC
 
-  Last updated 05/08/2024 Harvey Nixon
+  Last updated 06/08/2024 Harvey Nixon
 */
 #define CAN1_TX_PIN PD_1
 #define CAN1_RX_PIN PD_0
@@ -51,15 +51,10 @@ uint32_t interval = 3000;//1000; // time between sending out in ms - basically l
 uint32_t currentMillis, prevMillis = 0;
 
 char str_data[8];
+char hex_data[8];
 
 void floatToCharArray(float value, char* buffer, int bufferSize, int width, int precision){
   dtostrf(value, width, precision, buffer);
-}
-
-static uint32_t pseudoRandomValue (void) {
-  static uint32_t gSeed = 0 ;
-  gSeed = 8253729U * gSeed + 2396403U ;
-  return gSeed ;
 }
 
 void setup() {
@@ -84,43 +79,7 @@ void setup() {
   ACANFD_STM32_Settings settings (1000 * 1000, DataBitRateFactor::x4) ;
   settings.mModuleMode = ACANFD_STM32_Settings::NORMAL_FD; // Found in CANFDMessage.h lines 53 - 58
 
-  // Serial.print ("Bit Rate prescaler: ") ;
-  // Serial.println (settings.mBitRatePrescaler) ;
-  // Serial.print ("Arbitration Phase segment 1: ") ;
-  // Serial.println (settings.mArbitrationPhaseSegment1) ;
-  // Serial.print ("Arbitration Phase segment 2: ") ;
-  // Serial.println (settings.mArbitrationPhaseSegment2) ;
-  // Serial.print ("Arbitration SJW: ") ;
-  // Serial.println (settings.mArbitrationSJW) ;
-  // Serial.print ("Actual Arbitration Bit Rate: ") ;
-  // Serial.print (settings.actualArbitrationBitRate ()) ;
-  // Serial.println (" bit/s") ;
-  // Serial.print ("Arbitration Sample point: ") ;
-  // Serial.print (settings.arbitrationSamplePointFromBitStart ()) ;
-  // Serial.println ("%") ;
-  // Serial.print ("Exact Arbitration Bit Rate ? ") ;
-  // Serial.println (settings.exactArbitrationBitRate () ? "yes" : "no") ;
-  // Serial.print ("Data Phase segment 1: ") ;
-  // Serial.println (settings.mDataPhaseSegment1) ;
-  // Serial.print ("Data Phase segment 2: ") ;
-  // Serial.println (settings.mDataPhaseSegment2) ;
-  // Serial.print ("Data SJW: ") ;
-  // Serial.println (settings.mDataSJW) ;
-  // Serial.print ("Actual Data Bit Rate: ") ;
-  // Serial.print (settings.actualDataBitRate ()) ;
-  // Serial.println (" bit/s") ;
-  // Serial.print ("Data Sample point: ") ;
-  // Serial.print (settings.dataSamplePointFromBitStart ()) ;
-  // Serial.println ("%") ;
-  // Serial.print ("Exact Data Bit Rate ? ") ;
-  // Serial.println (settings.exactDataBitRate () ? "yes" : "no") ;
-
   const uint32_t errorCode = fdcan1.beginFD (settings) ;
-
-  // Serial.print ("Message RAM required minimum size: ") ;
-  // Serial.print (fdcan1.messageRamRequiredMinimumSize ()) ;
-  // Serial.println (" words") ;
- 
  if (0 == errorCode) {
     Serial.println ("can configuration ok") ;
   }else{
@@ -145,14 +104,6 @@ void setup() {
 //   public : uint8_t idx = 0 ;  // This field is used by the driver
 //   public : uint8_t len = 0 ;  // Length of data (0 ... 8)
 //   public : union {
-//     uint64_t data64        ; // Caution: subject to endianness
-//     int64_t  data_s64      ; // Caution: subject to endianness
-//     uint32_t data32 [2]    ; // Caution: subject to endianness
-//     int32_t  data_s32 [2]  ; // Caution: subject to endianness
-//     uint16_t data16 [4]    ; // Caution: subject to endianness
-//     int16_t  data_s16 [4]  ; // Caution: subject to endianness
-//     float    dataFloat [2] ; // Caution: subject to endianness
-//     int8_t   data_s8 [8]   ;
 //     uint8_t  data    [8] = {0, 0, 0, 0, 0, 0, 0, 0} ;
 //   } ;
 
@@ -188,8 +139,6 @@ void loop() {
     break;
     }
     ++datatype; 
-
-
  
       prevMillis = currentMillis;
   }// END of interval
@@ -201,29 +150,33 @@ void data(){
   Serial.println("------------------------------------------------------------------------------");
   Serial.print("Packet: ");Serial.println(counter);
   Serial.print("Data Type: ");Serial.println(datatype);
+
   floatToCharArray(send_data, str_data, sizeof(str_data), 8, 6);
+  for (int i = 0; i < 8 ; i++){
+    Serial.print(i);
+    Serial.print(" ");
+    Serial.println(str_data[i],HEX);
+    }
+
 
   const uint8_t sendBufferIndex = 0 ;
   
   //--- Send frame
   CANFDMessage frame ;
+
   // set can frame data to all 0s
   for (uint32_t i=0 ; i<frame.len ; i++) {
-    //frame.data [i] = uint8_t (pseudoRandomValue ()) ;
     frame.data [i] = 0 ;
     // this is where the data is 
     // going to create a loop to send data
     }
-
-    //for (int i = 0; str_data[i] != '\0'; i++){
-    //for (int i = 0; i < sizeof(frame.len) ; i++){
-
   for (int i = 0; i < 8 ; i++){
     Serial.print("Character ");
     Serial.print(i);
     Serial.print(": ");
     Serial.println(str_data[i]);
-  }
+
+    }
   Serial.print("Data : ");
   Serial.print("\t");
   for (int i = 0; i < 8 ; i++){
@@ -232,17 +185,11 @@ void data(){
   }
   Serial.println();
 
-
-
-
   // Layout the frame structure
   // ID, FRAMEs ETC
   frame.idx = sendBufferIndex ;
-
-  const uint32_t r = pseudoRandomValue () ;
   
   //   public : bool ext = false ; // false -> standard frame, true -> extended frame
-  //frame.ext = (r & (1 << 29)) != 0 ; 
   frame.ext = (0) ;
 
   // state where is in and what it means
@@ -262,24 +209,17 @@ void data(){
         frame.id &= 0x7FFU ;
       }
       switch (frame.type) {
-      // case CANFDMessage::CAN_REMOTE :
-      //   gCANRemoteFrameCount += 1 ;
-      //   frame.len = pseudoRandomValue () % 9 ;
-      //   break ;
       case CANFDMessage::CAN_DATA :
         gCanDataFrameCount += 1 ;
-        //frame.len = pseudoRandomValue () % 9 ;
-        frame.len = 8; // random number between 1 and 8 
+        //frame.len = 8; // random number between 1 and 8 
+        frame.len = sizeof(str_data);
         for (uint32_t i=0 ; i<frame.len ; i++) {
-          //frame.data [i] = uint8_t (pseudoRandomValue ()) ;
-          //frame.data [i] = uint8_t (i) ;
-          frame.data[i] = str_data[i,HEX];
+          frame.data[i] = (str_data[i]);
           // this is where the data is 
           // going to create a loop to send data
         }
       break ;
       }
-      //gBuffer.append (frame) ;
 
   // print the CAN frame
     Serial.print("Ascii: ");
@@ -288,17 +228,15 @@ void data(){
       Serial.print("\t");
     }
 
-
   Serial.println();
   const uint32_t sendStatus = fdcan1.tryToSendReturnStatusFD (frame) ;  
-
 
   Serial.println();      
   Serial.print("|---ID--|");Serial.print("|---LENGTH---|");Serial.println("|-------------------------DATA------------------------|");
   Serial.print("   ");Serial.print(frame.id, HEX);Serial.print("\t");Serial.print("\t");Serial.print(frame.len);Serial.print("\t");
   for (int i = 0; i < frame.len; i++){
-    Serial.print("0x");
-    Serial.print(frame.data[i],HEX);
+
+    Serial.print(frame.data[i]);
     Serial.print("   ");
   }
   Serial.println();
@@ -318,4 +256,3 @@ void data(){
   Serial.println();
 
 } //end of data
-
