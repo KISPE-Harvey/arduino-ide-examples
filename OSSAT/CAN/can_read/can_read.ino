@@ -19,8 +19,14 @@
 #define CAN1_TX_PIN PD_1
 #define CAN1_RX_PIN PD_0
 
+// #define CAN2_TX_PIN PB13
+// #define CAN2_RX_PIN PB12
+
 static const uint32_t FDCAN1_MESSAGE_RAM_WORD_SIZE = 2560 ;
 static const uint32_t FDCAN2_MESSAGE_RAM_WORD_SIZE = 0 ; // FDCAN2 not used
+
+// static const uint32_t FDCAN1_MESSAGE_RAM_WORD_SIZE = 0 ;// FDCAN1 not used
+// static const uint32_t FDCAN2_MESSAGE_RAM_WORD_SIZE = 2560 ; 
 
 #include <ACANFD_STM32.h>
 
@@ -33,7 +39,7 @@ uint32_t currentMillis, prevMillis = 0;
 
 void setup() {
   gBuffer.initWithSize (100) ;
-  pinMode (LED_BUILTIN, OUTPUT) ;
+  pinMode (LED1, OUTPUT) ;
   Serial.begin (115200);
   delay(2000);
   
@@ -54,10 +60,7 @@ void setup() {
   settings.mModuleMode = ACANFD_STM32_Settings::NORMAL_FD; // Found in CANFDMessage.h lines 53 - 58
 
     const uint32_t errorCode = fdcan1.beginFD (settings) ;
-
-  Serial.print ("Message RAM required minimum size: ") ;
-  Serial.print (fdcan1.messageRamRequiredMinimumSize ()) ;
-  Serial.println (" words") ;
+    //const uint32_t errorCode = fdcan2.beginFD (settings) ;
  
  if (0 == errorCode) {
     Serial.println ("can configuration ok") ;
@@ -71,6 +74,7 @@ void loop() {
   //--- Receive frame
   CANFDMessage receivedFrame ;
   if (gOk && fdcan1.receiveFD0 (receivedFrame)) {
+  //if (gOk && fdcan2.receiveFD1 (receivedFrame)) {    
     CANFDMessage storedFrame ;
     Serial.println();
     Serial.println("------------------------------------------------------------------------------");   

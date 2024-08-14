@@ -71,7 +71,7 @@ Wire.begin();
   TwoWire Wire4(PF14,PF15);
   Wire4.begin();
 
-  Last updated 02/07/2024 Harvey Nixon
+  Last updated 14/08/2024 Harvey Nixon
 */
 
 
@@ -99,8 +99,8 @@ void setup() {
   Serial.println();
   delay(2000);
 
-  pinMode(PB14, OUTPUT);
-  digitalWrite(PB14, HIGH);
+  pinMode(LED2, OUTPUT);
+  digitalWrite(LED2, HIGH);
 
 }
 
