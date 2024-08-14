@@ -12,16 +12,10 @@
   ____) | |  / ____ \ |____| |____ 
  |_____/|_| /_/    \_\_____|______|                         
 
-  Development and test code for the STM32H753VIT uC
+  Development and test code for the STM32H753ZIT uC
 
 */
-// i2c_scanner
-//
-// This sketch tests the standard 7-bit addresses
-// Devices with higher bit address might not be seen properly.
-//
-
-/* Example pinmap for STM32H753ZIT 
+/* Example pinmap for STM32H753VIT 
 
  I2C-1 standard pins: PB7(sda) PB6(scl)
 
@@ -73,15 +67,23 @@ Wire.begin();
   Last updated 14/08/2024 Harvey Nixon
 */
 
-
 #include <Wire.h>
+#include "SparkFun_BMI270_Arduino_Library.h"
 
-void setup() {
+// Create a new sensor object
+BMI270 imu;
 
-  Serial.begin(9600);
-  Wire.begin();
-  delay(2000);
-  
+// I2C address selection
+uint8_t i2cAddress = BMI2_I2C_PRIM_ADDR; // 0x68
+//uint8_t i2cAddress = BMI2_I2C_SEC_ADDR; // 0x69
+
+void setup()
+{
+    // Start serial
+    Serial.begin(9600);
+    // Initialize the I2C library
+    Wire.begin();
+    delay(2000);
 
   Serial.println("------------------------------------------------"); 
   Serial.println();
@@ -94,50 +96,56 @@ void setup() {
   Serial.println();
   Serial.println("------------------------------------------------");
   Serial.println();
-  Serial.println("I2C Scanner for STM32H753ZIT");
+  Serial.println("BMI270 Example for STM32H753VIT");
   Serial.println();
   delay(2000);
 
-  pinMode(LED2, OUTPUT);
-  digitalWrite(LED2, HIGH);
+    // Check if sensor is connected and initialize
+    // Address is optional (defaults to 0x68)
+    while(imu.beginI2C(i2cAddress) != BMI2_OK)
+    {
+        // Not connected, inform user
+        Serial.println("Error: BMI270 not connected, check wiring and I2C address!");
 
+        // Wait a bit to see if connection is established
+        delay(1000);
+    }
+
+    Serial.println("BMI270 connected!");
 }
 
+void loop()
+{
+    // Get measurements from the sensor. This must be called before accessing
+    // the sensor data, otherwise it will never update
+    imu.getSensorData();
 
-void loop() {
-  byte error, address;
-  int nDevices;
+    // Print acceleration data
+    Serial.print("Acceleration in g's");
+    Serial.print("\t");
+    Serial.print("X: ");
+    Serial.print(imu.data.accelX, 3);
+    Serial.print("\t");
+    Serial.print("Y: ");
+    Serial.print(imu.data.accelY, 3);
+    Serial.print("\t");
+    Serial.print("Z: ");
+    Serial.print(imu.data.accelZ, 3);
 
-  Serial.println("Scanning...");
+    Serial.print("\t");
 
-  nDevices = 0;
-  for(address = 1; address < 127; address++) {
-    // The i2c_scanner uses the return value of
-    // the Write.endTransmisstion to see if
-    // a device did acknowledge to the address.
+    // Print rotation data
+    Serial.print("Rotation in deg/sec");
+    Serial.print("\t");
+    Serial.print("X: ");
+    Serial.print(imu.data.gyroX, 3);
+    Serial.print("\t");
+    Serial.print("Y: ");
+    Serial.print(imu.data.gyroY, 3);
+    Serial.print("\t");
+    Serial.print("Z: ");
+    Serial.println(imu.data.gyroZ, 3);
 
-    Wire.beginTransmission(address);
-    error = Wire.endTransmission();
-
-    if (error == 0) {
-      Serial.print("I2C device found at address 0x");
-      if (address < 16)
-        Serial.print("0");
-      Serial.println(address, HEX);
-
-      nDevices++;
-    }
-    else if (error == 4) {
-      Serial.print("Unknown error at address 0x");
-      if (address < 16)
-        Serial.print("0");
-      Serial.println(address, HEX);
-    }
-  }
-  if (nDevices == 0)
-    Serial.println("No I2C devices found");
-  else
-    Serial.println("done");
-
-  delay(5000);           // wait 5 seconds for next scan
+    // Print 50x per second
+    delay(20);
 }

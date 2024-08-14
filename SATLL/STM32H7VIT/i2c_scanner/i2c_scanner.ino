@@ -12,9 +12,10 @@
   ____) | |  / ____ \ |____| |____ 
  |_____/|_| /_/    \_\_____|______|                         
 
-  Development and test code for the STM32H753VIT uC
+  Development and test code for the STM32H753ZIT uC
 
 */
+
 // i2c_scanner
 //
 // This sketch tests the standard 7-bit addresses
