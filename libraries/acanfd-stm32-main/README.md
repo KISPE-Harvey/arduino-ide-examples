@@ -4,7 +4,8 @@ Handled boards:
 
 * NUCLEO-G431KB (1 CAN FD),
 *  NUCLEO-G474RE (3 CAN FD),
-*  NUCLEO-H743ZI2 (2 CAN FD).
+*  NUCLEO-H743ZI2 (2 CAN FD),
+*  NUCLEO-H753ZI (2 CAN FD).
 
 ### Compatibility with other ACAN libraries
 
