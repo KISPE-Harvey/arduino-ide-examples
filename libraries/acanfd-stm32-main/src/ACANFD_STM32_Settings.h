@@ -17,10 +17,9 @@ uint32_t fdcanClock (void) ;
 
 #ifdef ARDUINO_NUCLEO_H743ZI2
   static const uint32_t FDCAN_MESSAGE_RAM_WORD_SIZE = 2560 ;
-#elif defined (ARDUINO_NUCLEO_H753ZI)
+#elif defined(ARDUINO_NUCLEO_H753ZI)
   static const uint32_t FDCAN_MESSAGE_RAM_WORD_SIZE = 2560 ;
 #endif
-
 
 //----------------------------------------------------------------------------------------
 //  ACANFD_STM32_Settings class
@@ -210,7 +209,8 @@ class ACANFD_STM32_Settings {
   #endif
 
 
-#ifdef ARDUINO_NUCLEO_H753ZI
+
+  #ifdef ARDUINO_NUCLEO_H753ZI
 
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 

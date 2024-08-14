@@ -19,7 +19,7 @@
 
 #ifdef ARDUINO_NUCLEO_H743ZI2
   #include "ACANFD-STM32-programmable-ram-sections.h"
-#elif defined (ARDUINO_NUCLEO_H753ZI)
+#elif defined(ARDUINO_NUCLEO_H752ZI)
   #include "ACANFD-STM32-programmable-ram-sections.h"
 #elif defined (ARDUINO_NUCLEO_G431KB)
   #include "ACANFD-STM32-fixed-ram-sections.h"
