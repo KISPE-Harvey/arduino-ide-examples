@@ -7,18 +7,21 @@
  |_|\_\_____|_____/|_|    |______|                                 
    _____ _____        _____ ______ 
   / ____|  __ \ /\   / ____|  ____|
- | (___ | |__) /  \ | |    | |__   
+ | (___ | |__) /  \ | |    | |__    
   \___ \|  ___/ /\ \| |    |  __|  
   ____) | |  / ____ \ |____| |____ 
  |_____/|_| /_/    \_\_____|______|                         
 
   Development and test code for the STM32H753ZIT uC
 
-  Last updated 29/07/2024 Harvey Nixon
+  Last updated 13/08/2024 Harvey Nixon
 */
-int state = 0;
-bool button_state = false;
-bool previous_button_state = true;
+int state1 = 0;
+bool button1_state = false;
+bool previous_button1_state = true;
+int state2 = 0;
+bool button2_state = false;
+bool previous_button2_state = true;
 
 void setup() {
   Serial.begin(9600);
@@ -36,65 +39,70 @@ void setup() {
   Serial.println("------------------------------------------------");
   delay(2000);
 
-  pinMode(USER_BTN, INPUT);
-  // USER_BTN is pin PC13
+  pinMode(USER_BTN1, INPUT);
+  // USER_BTN1 is pin PC6
+
+  pinMode(USER_BTN2, INPUT);
+  // USER_BTN is pin PC4
 
   // The LED pins get set out outputs so we can toggle them on or off
-  pinMode(PB0,OUTPUT);  // Green LED
-  pinMode(PE1,OUTPUT);  // Orange LED
-  pinMode(PB14,OUTPUT); // Red LED
+  pinMode(LED1,OUTPUT);  // LED1 is pin PG6
+  pinMode(LED2,OUTPUT);  // LED2 is pin PG7
+  pinMode(LED3,OUTPUT);  // LED3 is pin PG8
 }
 
 void loop() {
 
-  button_state = digitalRead(USER_BTN);
+  button1_state = digitalRead(USER_BTN1);
+  button2_state = digitalRead(USER_BTN2);
   // button_state is true or false, true if being pressed down, false if not
 
-  Serial.println(state);
+  Serial.println(state1);
+  //Serial.println(state2);
   // Just to keep track of the state 
 
-if(previous_button_state != button_state){ 
+if(previous_button1_state != button1_state){ 
   // This line makes sure not to chnage the state unless the state has chnaged
   // This stopped the issue of holding down the button and having he state increase
   
-  if (button_state == true){
+  if (button_state1 == true){
     // if button pressed, increase the state number by 1
 
-    state = state + 1;
+    state1 = state1 + 1;
   } 
-  if (state == 1){    
-    digitalWrite(PB14, LOW);
-    digitalWrite(PE1, LOW);
-    digitalWrite(PB0, HIGH);
-    // Turns on Green LED, turns off all others
+  if (state1 == 1){    
+    digitalWrite(LED2, LOW);
+    digitalWrite(LED3, LOW);
+    digitalWrite(LED1, HIGH);
+    // Turns on LED1, turns off all others
   }
-  if (state == 2){
-    digitalWrite(PB0, LOW);
-    digitalWrite(PB14, LOW);
-    digitalWrite(PE1, HIGH);
-    // Turns on Orange LED, turns off all others
+  if (state1 == 2){
+    digitalWrite(LED1, LOW);
+    digitalWrite(LED3, LOW);
+    digitalWrite(LED2, HIGH);
+    // Turns on LED2, turns off all others
   }
-  if (state == 3){
-    digitalWrite(PB7, LOW);
-    digitalWrite(PE1, LOW);    
-    digitalWrite(PB14, HIGH);
-    // Turns on Red LED, turns off all others
+  if (state1 == 3){
+    digitalWrite(LED1, LOW);
+    digitalWrite(LED2, LOW);    
+    digitalWrite(LED3, HIGH);
+    // Turns on LED3, turns off all others
   }
-  if (state == 4){
-    digitalWrite(PB0, HIGH);
-    digitalWrite(PE1, HIGH);
-    digitalWrite(PB14, HIGH);
+  if (state1 == 4){
+    digitalWrite(LED1, HIGH);
+    digitalWrite(LED2, HIGH);
+    digitalWrite(LED3, HIGH);
     // Turns on all LEDs
   }
-  if (state == 5){
-    digitalWrite(PB0, LOW);
-    digitalWrite(PE1, LOW);
-    digitalWrite(PB14, LOW);
+  if (state1 == 5){
+    digitalWrite(LED1, LOW);
+    digitalWrite(LED2, LOW);
+    digitalWrite(LED3, LOW);
     // Turns off all LEDs
-    state = 0;
+    state1 = 0;
     // Resets the state value once the counter has gotten too high
   }
-  previous_button_state = button_state;
+  previous_button1_state = button1_state;
   // Is used to check if the state has changed from before
 }
 

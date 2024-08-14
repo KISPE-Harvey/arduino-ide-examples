@@ -14,13 +14,19 @@
 
   Development and test code for the STM32H753ZIT uC
 
-  Last updated 06/08/2024 Harvey Nixon
+  Last updated 14/08/2024 Harvey Nixon
 */
-#define CAN1_TX_PIN PD_1
-#define CAN1_RX_PIN PD_0
+#define CAN1_TX_PIN PA12
+#define CAN1_RX_PIN PA11
+
+// #define CAN2_TX_PIN PB13
+// #define CAN2_RX_PIN PB12
 
 static const uint32_t FDCAN1_MESSAGE_RAM_WORD_SIZE = 2560 ;
 static const uint32_t FDCAN2_MESSAGE_RAM_WORD_SIZE = 0 ; // FDCAN2 not used
+
+// static const uint32_t FDCAN1_MESSAGE_RAM_WORD_SIZE = 0 ;// FDCAN1 not used
+// static const uint32_t FDCAN2_MESSAGE_RAM_WORD_SIZE = 2560 ; 
 
 #include <ACANFD_STM32.h>
 
@@ -59,7 +65,7 @@ void floatToCharArray(float value, char* buffer, int bufferSize, int width, int 
 
 void setup() {
   gBuffer.initWithSize (100) ;
-  pinMode (LED_BUILTIN, OUTPUT) ;
+  pinMode (LED1, OUTPUT) ;
   Serial.begin (115200);
   delay(2000);
   
@@ -80,6 +86,7 @@ void setup() {
   settings.mModuleMode = ACANFD_STM32_Settings::NORMAL_FD; // Found in CANFDMessage.h lines 53 - 58
 
   const uint32_t errorCode = fdcan1.beginFD (settings) ;
+  //const uint32_t errorCode = fdcan2.beginFD (settings) ;
  if (0 == errorCode) {
     Serial.println ("can configuration ok") ;
   }else{
@@ -87,13 +94,6 @@ void setup() {
     Serial.println (errorCode, HEX) ;
   }
 
-  pinMode(USER_BTN, INPUT);
-  // USER_BTN is pin PC13
-  
-  // The LED pins get set out outputs so we can toggle them on or off
-  pinMode(PB0,OUTPUT);  // Green LED
-  pinMode(PE1,OUTPUT);  // Orange LED
-  pinMode(PB14,OUTPUT); // Red LED
 
 }
 
@@ -230,6 +230,7 @@ void data(){
 
   Serial.println();
   const uint32_t sendStatus = fdcan1.tryToSendReturnStatusFD (frame) ;  
+  //const uint32_t sendStatus = fdcan2.tryToSendReturnStatusFD (frame) ; 
 
   Serial.println();      
   Serial.print("|---ID--|");Serial.print("|---LENGTH---|");Serial.println("|-------------------------DATA------------------------|");

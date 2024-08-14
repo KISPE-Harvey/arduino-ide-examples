@@ -31,7 +31,7 @@
   A7 - PF5      -    ADC3
   A8 - PF6      -    ADC3
 
-  Last updated 29/07/2024 Harvey Nixon
+  Last updated 13/08/2024 Harvey Nixon
 */
 
 void setup() {
