@@ -1,3 +1,22 @@
+/*
+  _  _______  _____ _____  ______ 
+ | |/ /_   _|/ ____|  __ \|  ____|
+ | ' /  | | | (___ | |__) | |__   
+ |  <   | |  \___ \|  ___/|  __|  
+ | . \ _| |_ ____) | |    | |____ 
+ |_|\_\_____|_____/|_|    |______|                                 
+   _____ _____        _____ ______ 
+  / ____|  __ \ /\   / ____|  ____|
+ | (___ | |__) /  \ | |    | |__   
+  \___ \|  ___/ /\ \| |    |  __|  
+  ____) | |  / ____ \ |____| |____ 
+ |_____/|_| /_/    \_\_____|______|                         
+
+  Development and test code for the RP2040 uC
+  
+  Last updated 15/08/2024 Harvey Nixon & Mae Parsons
+
+*/
 // Open loop motor control example
 #include <SimpleFOC.h>
 
@@ -50,6 +69,24 @@ void setup() {
   // velocity low pass filtering time constant
   motor.LPF_velocity.Tf = 0.1f; //was 0.02f
   Serial.begin(115200);
+
+  delay(2000);
+
+  Serial.println("------------------------------------------------"); 
+  Serial.println();
+  Serial.println("  _  _______  _____ _____  ______ ");
+  Serial.println(" | |/ /_   _|/ ____|  __ \\|  ____|");
+  Serial.println(" | ' /  | | | (___ | |__) | |__   ");
+  Serial.println(" |  <   | |  \\___ \\|  ___/|  __|  ");
+  Serial.println(" | . \\ _| |_ ____) | |    | |____ ");
+  Serial.println(" |_|\\_\\_____|_____/|_|    |______|");
+  Serial.println();
+  Serial.println("------------------------------------------------");
+  Serial.println();
+  Serial.println("Motor Velocity Control Example for RP2040");
+  Serial.println();
+  delay(2000);
+
   // comment out if not needed
   motor.useMonitoring(Serial);
   motor.monitor_variables = _MON_TARGET | _MON_VEL ; 
