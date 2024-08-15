@@ -17,13 +17,9 @@
   Last updated 15/08/2024 Harvey Nixon
 
 */
-/*********
-  Rui Santos & Sara Santos - Random Nerd Tutorials
-  Complete project details at https://RandomNerdTutorials.com/raspberry-pi-pico-internal-temperature-arduino/
-*********/
 
-float tempC;
-float tempF;
+#include <Adafruit_INA260.h>
+Adafruit_INA260 ina260 = Adafruit_INA260();
 
 void setup() {
   Serial.begin(115200);
@@ -40,18 +36,30 @@ void setup() {
   Serial.println();
   Serial.println("------------------------------------------------");
   Serial.println();
-  Serial.println("Internal Temperature sensor Example for RP2040");
+  Serial.println("INA260 Test Example for RP2040");
   Serial.println();
   delay(2000);
 
+  if (!ina260.begin()) {
+    Serial.println("Couldn't find INA260 chip");
+    while (1);
+  }
+  Serial.println("Found INA260 chip");
 }
 
 void loop() {
-  tempC = analogReadTemp(); // Get internal temperature
-  tempF = tempC * 9.0 / 5.0 + 32.0; // Fahrenheit conversion
-  Serial.print("Temperature Celsius (ºC): ");
-  Serial.println(tempC);
-  Serial.print("Temperature Fahrenheit (ºF): ");
-  Serial.println(tempF);
+  Serial.print("Current: ");
+  Serial.print(ina260.readCurrent());
+  Serial.println(" mA");
+
+  Serial.print("Bus Voltage: ");
+  Serial.print(ina260.readBusVoltage());
+  Serial.println(" mV");
+
+  Serial.print("Power: ");
+  Serial.print(ina260.readPower());
+  Serial.println(" mW");
+
+  Serial.println();
   delay(1000);
 }
