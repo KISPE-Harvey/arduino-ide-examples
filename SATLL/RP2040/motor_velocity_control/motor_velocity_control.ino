@@ -1,150 +1,144 @@
-/*
-  _  _______  _____ _____  ______ 
- | |/ /_   _|/ ____|  __ \|  ____|
- | ' /  | | | (___ | |__) | |__   
- |  <   | |  \___ \|  ___/|  __|  
- | . \ _| |_ ____) | |    | |____ 
- |_|\_\_____|_____/|_|    |______|                                 
-   _____ _____        _____ ______ 
-  / ____|  __ \ /\   / ____|  ____|
- | (___ | |__) /  \ | |    | |__   
-  \___ \|  ___/ /\ \| |    |  __|  
-  ____) | |  / ____ \ |____| |____ 
- |_____/|_| /_/    \_\_____|______|                         
+/*******************************
 
-  Development and test code for the RP2040 uC
-  
-  Last updated 15/08/2024 Harvey Nixon & Mae Parsons
+Velocity Control and Measure
 
-*/
+Written by Harvey Nixon 17/04/2024
+
+
+**********************************/
+
 // Open loop motor control example
 #include <SimpleFOC.h>
 
-#define INT_PIN   9
-#define CURRENT_PIN A0
-#define current_lim_mA 400
-long startTime; // variable to store the start time
-
-const long duration = 100; // duration of 1 seconds in milliseconds
-
-float current = 0; //variable to store the current reading in
-float min_curr_reading = 0;
-
-
-// BLDC motor & driver instance
-// BLDCMotor motor = BLDCMotor(pole pair number);
-// BLDC motor & driver instance
 BLDCMotor motor = BLDCMotor(7, 5.47); 
 BLDCDriver3PWM driver = BLDCDriver3PWM(7,3,1,6,2,0); //3 pwm pins
 
 MagneticSensorSPI sensor = MagneticSensorSPI(AS5147_SPI, 17); //change to SPI CS for encoder 
 
+
+// Current Sensor
 InlineCurrentSense current_sense = InlineCurrentSense(0.01f, 50.0f, A0, A2);
 
 //target variable
-float target_velocity = 0;
+float target_velocity = 20; // This is omega_Reference
+float filteredValue;
+float error_velocity;
+float motor_velocity;
+float motor_angle; 
+int recordNumber = 0;
+uint32_t Time;
+uint32_t MeasureTime;
 
-// instantiate the commander
+// instantiate the commander - this allows us to chnage the refrence velocity during the program
 Commander command = Commander(Serial);
 void doTarget(char* cmd) { command.scalar(&target_velocity, cmd); }
 void doLimit(char* cmd) { command.scalar(&motor.voltage_limit, cmd); }
 
-void onMotor(char* cmd){ command.motor(&motor, cmd); }
+
+// Define the time constant for the low-pass filter (RC time constant)
+const float RC = 0.1;  // You may need to adjust this value based on your requirements
+
 
 void setup() {
+  Time = millis();
+  SPI.begin();
+    // initialise magnetic sensor hardware
   sensor.init();
+  // link the motor to the sensor
   motor.linkSensor(&sensor);
-  driver.voltage_power_supply = 7.4;
+
+  // driver config
+  SimpleFOCDebug::enable(&Serial);
+  // driver config
+  // power supply voltage [V]
+  driver.voltage_power_supply = 12;
+  // limit the maximal dc voltage the driver can set
+  // as a protection measure for the low-resistance motors
+  // this value is fixed on startup
+  //driver.voltage_limit = 3;
   driver.init();
   motor.linkDriver(&driver);
-  motor.foc_modulation = FOCModulationType::SinePWM;
-  motor.controller = MotionControlType::torque;
 
-  // contoller configuration based on the control type
-  motor.PID_velocity.P = 0.2f;
-  motor.PID_velocity.I = 10; //was 10
-  motor.PID_velocity.D = 0;
-  // default voltage_power_supply
-  motor.voltage_limit = 7.4;
-  // velocity low pass filtering time constant
-  motor.LPF_velocity.Tf = 0.1f; //was 0.02f
+
+  // set motion control loop to be used
+  //motor.controller = MotionControlType::velocity;
+    motor.controller = MotionControlType::velocity_openloop;
+
+  // use monitoring with serial 
   Serial.begin(115200);
-
-  delay(2000);
-
-  Serial.println("------------------------------------------------"); 
-  Serial.println();
-  Serial.println("  _  _______  _____ _____  ______ ");
-  Serial.println(" | |/ /_   _|/ ____|  __ \\|  ____|");
-  Serial.println(" | ' /  | | | (___ | |__) | |__   ");
-  Serial.println(" |  <   | |  \\___ \\|  ___/|  __|  ");
-  Serial.println(" | . \\ _| |_ ____) | |    | |____ ");
-  Serial.println(" |_|\\_\\_____|_____/|_|    |______|");
-  Serial.println();
-  Serial.println("------------------------------------------------");
-  Serial.println();
-  Serial.println("Motor Velocity Control Example for RP2040");
-  Serial.println();
-  delay(2000);
-
   // comment out if not needed
   motor.useMonitoring(Serial);
-  motor.monitor_variables = _MON_TARGET | _MON_VEL ; 
- 
-   min_curr_reading = analogRead(CURRENT_PIN);
-    // downsampling
-  motor.monitor_downsample = 3500; // default 10
-  // initialise motor
+
+  // init motor hardware
   motor.init();
-  // align encoder and start FOC
+    // align sensor and start FOC
   motor.initFOC();
 
-  command.add('M', onMotor, "motor");
-  // Run user commands to configure and the motor (find the full command list in docs.simplefoc.com)
+  // add target command T
+  command.add('T', doTarget, "target velocity");
+  command.add('L', doLimit, "voltage limit");
+
+  Serial.begin(115200);
   Serial.println("Motor ready!");
   Serial.println("Set target velocity [rad/s]");
-  Serial.println(F("WAITING FOR MOTOR COMMANDS"));
 
 
   delay(1000);
-}
+  Serial.print("Target");Serial.print("\t");
+  // display the angle and the angular velocity to the terminal
+  Serial.print("Measured");
+  Serial.print("\t");
+  Serial.println("Angle");
+  MeasureTime = millis();
+} // END of Setup()
 
 void loop() {
-
+   // motor.loopFOC();
   // open loop velocity movement
   // using motor.voltage_limit and motor.velocity_limit
   // to turn the motor "backwards", just set a negative target_velocity
+
+  Time = millis() - MeasureTime;
+ // if (Time < 5000){
   motor.move(target_velocity);
 
-    //PhaseCurrent_s currents = current_sense.getPhaseCurrents();
-    //float current_magnitude = current_sense.getDCCurrent();
-/*
-    Serial.print(currents.a*1000); // milli Amps
-    Serial.print("\t");
-    Serial.print(currents.b*1000); // milli Amps
-    Serial.print("\t");
-    Serial.print(currents.c*1000); // milli Amps
-    */
-    Serial.print("\t");
-    //Serial.println(current_magnitude*1000); // milli Amps
-    current = ((analogRead(CURRENT_PIN)-min_curr_reading)/0.310)/1.1;
-    Serial.print(current); // milli Amps
-      if(current > current_lim_mA){
-         motor.move(0);
-         target_velocity = 0;
-      }
-    Serial.print(" mA");
-    Serial.print("\t");
+  sensor.update();
+  motor_velocity = sensor.getVelocity();
+
+    // Apply low-pass filtering
+  filteredValue = (filteredValue * (1 - RC)) + (motor_velocity * RC);
+
+
+
+  motor_angle = sensor.getAngle();
+  error_velocity = target_velocity - motor_velocity;
+
+  // Print tab when testing, comma for data logging
+  //Serial.print(recordNumber);
+  Serial.print(Time);
+  //Serial.print("\t");
+  Serial.print(",");
+  Serial.print(target_velocity);
+  //Serial.print("\t");
+  Serial.print(",");
   
-    sensor.update();
-    // display the angle and the angular velocity to the terminal
-    Serial.print(sensor.getAngle());
-    Serial.print("\t");
-    Serial.println(sensor.getVelocity());
+  // display the angle and the angular velocity to the terminal
+  //Serial.print(motor_velocity);
+    // Print the filtered value
+  Serial.print(filteredValue);
+  //Serial.print("\t"); 
+  Serial.print(",");
+  //Serial.print(error_velocity);
+  Serial.println(error_velocity);
+  //Serial.print("\t"); 
+  //Serial.print(",");
+  //Serial.println(motor_angle);
 
   // user communication
   command.run();
 
+  recordNumber = recordNumber + 1;
 
-
-}
+  delay(1);
+  
+} // END of Loop()

@@ -4,7 +4,7 @@
 //    THIS FILE IS SPECIFIC TO NUCLEO-H743ZI2
 //----------------------------------------------------------------------------------------
 
-#if defined (ARDUINO_NUCLEO_H743ZI2) || defined (ARDUINO_NUCLEO_H753ZI)
+#if defined (ARDUINO_NUCLEO_H743ZI2) || defined (ARDUINO_NUCLEO_H753ZI) || defined (ARDUINO_GENERIC_H753ZITX)|| defined (ARDUINO_GENERIC_H753VITX)
 
 //----------------------------------------------------------------------------------------
 //    Constructor
