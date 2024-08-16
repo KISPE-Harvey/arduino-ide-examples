@@ -39,7 +39,7 @@ uint32_t currentMillis, prevMillis = 0;
 
 void setup() {
   gBuffer.initWithSize (100) ;
-  pinMode (LED_BUILTIN, OUTPUT) ;
+  //pinMode (LED_BUILTIN, OUTPUT) ;
   Serial.begin (115200);
   delay(2000);
   
@@ -60,6 +60,7 @@ void setup() {
   settings.mModuleMode = ACANFD_STM32_Settings::NORMAL_FD; // Found in CANFDMessage.h lines 53 - 58
 
     const uint32_t errorCode = fdcan1.beginFD (settings) ;
+    //const uint32_t errorCode = fdcan2.beginFD (settings) ;
 
   Serial.print ("Message RAM required minimum size: ") ;
   Serial.print (fdcan1.messageRamRequiredMinimumSize ()) ;
@@ -77,6 +78,7 @@ void loop() {
   //--- Receive frame
   CANFDMessage receivedFrame ;
   if (gOk && fdcan1.receiveFD0 (receivedFrame)) {
+  //if (gOk && fdcan2.receiveFD1 (receivedFrame)) {      
     CANFDMessage storedFrame ;
     Serial.println();
     Serial.println("------------------------------------------------------------------------------");   

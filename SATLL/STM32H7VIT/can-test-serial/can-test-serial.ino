@@ -16,11 +16,17 @@
 
   Last updated 16/08/2024 Harvey Nixon
 */
-#define CAN1_TX_PIN PD_1
-#define CAN1_RX_PIN PD_0
+#define CAN1_TX_PIN PA12
+#define CAN1_RX_PIN PA11
+
+// #define CAN2_TX_PIN PB13
+// #define CAN2_RX_PIN PB12
 
 static const uint32_t FDCAN1_MESSAGE_RAM_WORD_SIZE = 2560 ;
 static const uint32_t FDCAN2_MESSAGE_RAM_WORD_SIZE = 0 ; // FDCAN2 not used
+
+// static const uint32_t FDCAN1_MESSAGE_RAM_WORD_SIZE = 0 ;// FDCAN1 not used
+// static const uint32_t FDCAN2_MESSAGE_RAM_WORD_SIZE = 2560 ; 
 
 #include <ACANFD_STM32.h>
 

@@ -14,10 +14,10 @@
 
   Development and test code for the STM32H753ZIT uC
 
-  Last updated 14/08/2024 Harvey Nixon
+  Last updated 16/08/2024 Harvey Nixon
 */
-#define CAN1_TX_PIN PD_1
-#define CAN1_RX_PIN PD_0
+#define CAN1_TX_PIN PA12
+#define CAN1_RX_PIN PA11
 
 // #define CAN2_TX_PIN PB13
 // #define CAN2_RX_PIN PB12

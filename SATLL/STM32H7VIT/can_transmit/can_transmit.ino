@@ -65,7 +65,7 @@ void floatToCharArray(float value, char* buffer, int bufferSize, int width, int 
 
 void setup() {
   gBuffer.initWithSize (100) ;
-  pinMode (LED_BUILTIN, OUTPUT) ;
+  //pinMode (LED_BUILTIN, OUTPUT) ;
   Serial.begin (115200);
   delay(2000);
   
@@ -86,6 +86,7 @@ void setup() {
   settings.mModuleMode = ACANFD_STM32_Settings::NORMAL_FD; // Found in CANFDMessage.h lines 53 - 58
 
   const uint32_t errorCode = fdcan1.beginFD (settings) ;
+  //const uint32_t errorCode = fdcan2.beginFD (settings) ;
  if (0 == errorCode) {
     Serial.println ("can configuration ok") ;
   }else{
