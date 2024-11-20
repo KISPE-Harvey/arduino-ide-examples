@@ -71,7 +71,7 @@ Wire.begin();
   TwoWire Wire4(PF14,PF15);
   Wire4.begin();
 
-  Last updated 14/08/2024 Harvey Nixon
+  Last updated 20/11/2024 Harvey Nixon
 */
 
 
@@ -79,7 +79,9 @@ Wire.begin();
 
 void setup() {
 
+  Wire.begin();
   Serial.begin(9600);
+  
   Wire.begin();
   delay(2000);
   
@@ -98,10 +100,6 @@ void setup() {
   Serial.println("I2C Scanner for STM32H753ZIT");
   Serial.println();
   delay(2000);
-
-  pinMode(LED2, OUTPUT);
-  digitalWrite(LED2, HIGH);
-
 }
 
 
