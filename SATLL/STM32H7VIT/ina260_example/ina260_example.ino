@@ -22,7 +22,8 @@
 Adafruit_INA260 ina260 = Adafruit_INA260();
 
 void setup() {
-  Serial.begin(115200);
+  Serial.begin(9600);
+  Wire.begin();
   delay(2000);
 
   Serial.println("------------------------------------------------"); 
