@@ -1,0 +1,25 @@
+#######################################
+# Syntax Coloring Map For tnc75 Lib
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+tcn75	KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+readTemperature	KEYWORD2
+readConfig	KEYWORD2
+readHisteresys	KEYWORD2
+readSetPoint	KEYWORD2
+writeSetPoint	KEYWORD2
+writeHisteresys	KEYWORD2
+writeCmptrInt	KEYWORD2
+writeShutdown	KEYWORD2
+writePolarity	KEYWORD2
+writeFault	KEYWORD2
+
