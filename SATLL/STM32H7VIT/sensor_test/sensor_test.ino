@@ -25,7 +25,11 @@ Adafruit_INA260 ina260 = Adafruit_INA260();
 #define tcn75address 0x4F // with pins 5~7 set to GND, the device address is 0x48
 tcn75 termometro(tcn75address);
 
-
+//NeoPixel
+#include <Adafruit_NeoPixel.h>
+#define PIN        PB12 
+#define NUMPIXELS 1 // How many NeoPixels are attached?
+Adafruit_NeoPixel LED(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
 
 
 #define MTR_THERM PA0
@@ -65,9 +69,10 @@ int warmup_flag; // flag used to print out warmup data or not
 
 void setup() {
   Serial.begin(9600);
+  Serial.flush();
   Wire.begin();
   delay(2000);
-    Serial.println("------------------------------------------------"); 
+  Serial.println("------------------------------------------------"); 
   Serial.println();
   Serial.println("  _  _______  _____ _____  ______ ");
   Serial.println(" | |/ /_   _|/ ____|  __ \\|  ____|");
@@ -82,11 +87,35 @@ void setup() {
   Serial.println();
   delay(4000); 
 
-  //Flash neo pixel 
+  pinMode(PIN, OUTPUT);
+  //Flash neo pixel
+  LED.begin();           // INITIALIZE NeoPixel strip object (REQUIRED)
+  //LED.clear();            // Turn OFF all pixels ASAP
+  LED.setBrightness(10); // Set BRIGHTNESS to about 1/5 (max = 255) 
+    LED.setPixelColor(1, LED.Color(0, 0, 0));// sets LED to Green
+  //LED.show();   // Send the updated pixel colors to the hardware.
+  delay(1000);
+
+  LED.setPixelColor(1, LED.Color(0, 0, 150));// sets LED to Blue
+ // LED.show();   // Send the updated pixel colors to the hardware.
+  delay(1000);
+  LED.setPixelColor(1, LED.Color(0, 0, 0));// sets LED to Green
+  //LED.show();   // Send the updated pixel colors to the hardware.
+  delay(1000);
+  //LED.clear();            // Turn OFF all pixels ASAP
+  //delay(500);
+
   startup();
   delay(4000);
   warmup();
- // flash neopixel 
+      LED.setPixelColor(1, LED.Color(0, 0, 0));// sets LED to Green
+    LED.show();   // Send the updated pixel colors to the hardware.
+    delay(100);
+  LED.setPixelColor(1, LED.Color(0, 0, 150));// sets LED to Blue
+  LED.show();   // Send the updated pixel colors to the hardware.
+  delay(100);
+  LED.clear();            // Turn OFF all pixels ASAP
+  delay(100);
 
 
 } // END of startup()
@@ -114,15 +143,29 @@ void startup(){
 
 
   Serial.println("--------------------------------------------");
-  Serial.print("Sensor Checklist");
+  Serial.println("Sensor Checklist");
 // INA260
   Serial.print("- Power chip");
 
   if (!ina260.begin()) {
     Serial.println("- ERROR");
-    // set neo pixel to red
-  }
+    LED.setPixelColor(1, LED.Color(150, 0, 0));// sets LED to RED
+    LED.show();   // Send the updated pixel colors to the hardware.
+    delay(100);
+    LED.clear();            // Turn OFF all pixels ASAP
+    delay(100);
+  } else {
   Serial.println("- Success");
+  LED.setPixelColor(1, LED.Color(0, 0, 0));// sets LED to Green
+  LED.show();   // Send the updated pixel colors to the hardware.
+  delay(100);
+  LED.setPixelColor(1, LED.Color(0, 150, 0));// sets LED to Green
+  LED.show();   // Send the updated pixel colors to the hardware.
+  delay(100);
+  LED.clear();            // Turn OFF all pixels ASAP
+  delay(100);
+  }
+
 
 // TCN75
   Serial.print("- Temperature Sensor");
@@ -135,8 +178,21 @@ void startup(){
   termometro.readSetPoint();
   if (error == 0) {
     Serial.println("- Success");
+    LED.setPixelColor(1, LED.Color(0, 0, 0));// sets LED to Green
+    LED.show();   // Send the updated pixel colors to the hardware.
+    delay(100);
+    LED.setPixelColor(1, LED.Color(0, 150, 0));// sets LED to Green
+    LED.show();   // Send the updated pixel colors to the hardware.
+    delay(100);
+    LED.clear();            // Turn OFF all pixels ASAP
+    delay(100);
   } else {
     Serial.println("- ERROR");
+    LED.setPixelColor(1, LED.Color(150, 0, 0));// sets LED to Green
+    LED.show();   // Send the updated pixel colors to the hardware.
+    delay(100);
+    LED.clear();            // Turn OFF all pixels ASAP
+    delay(100);
   }
   Serial.print("- CAN");
   Serial.println(" - NOT CONFIGURED"); 
@@ -145,6 +201,8 @@ void startup(){
 
 
 void warmup(){
+  LED.setPixelColor(1, LED.Color(0, 0, 150));// sets LED to Green
+  LED.show();   // Send the updated pixel colors to the hardware.
   Serial.println("Warming Sensors");
   // Uncomment to see the data output
   warmup_flag = 1;
@@ -203,11 +261,13 @@ void warmup(){
   //print average
     switch (warmup_flag){
       case 1:
-        Serial.print("Average R");Serial.print("\t"); 
+        Serial.print("Average R0");Serial.print("\t"); 
         Serial.print(OBC_R0);Serial.println(" Ohm");
         Serial.print("Average T0");Serial.print("\t");
         Serial.print(T0_sum);Serial.println(" C");
         break;
     }
   Serial.println("--------------------------------------------");
+  LED.clear();            // Turn OFF all pixels ASAP
+  delay(100);
 } //END of warmup
