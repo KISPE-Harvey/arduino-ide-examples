@@ -8,23 +8,19 @@
 
 // Libraries
 #include <Adafruit_NeoPixel.h>
-long int currentMillis;
-long int previousMillis;
-int sampleInterval = 1000; // Sample interval in ms 
 
-long int currentMillis_temp;
-long int previousMillis_temp;
-int sampleInterval_temp = 200; // Sample interval in ms 
+#include <Adafruit_INA260.h>
+Adafruit_INA260 ina260 = Adafruit_INA260();
 
+#include "tcn75.h"
+#define tcn75address 0x4F // with pins 5~7 set to GND, the device address is 0x48
 
+tcn75 termometro(tcn75address);
 
 //start spi/ create a void to enable spi
-
 //KISPE library
-
 //Thermistor.callibrate(OBC); //etc...
 //Wire.begin for the OBc i2c and Payload i2c
-
 // CAN/UART
 //Serial.begin for the AOCS uart
 
@@ -43,7 +39,7 @@ struct obc {
   float R;
   float T0 = 298.15;
   float T;
-  float Thermistor_Temp;
+  float TCN75_Temp;
   float bus_Voltage;
   float bus_Current;
   float bus_Power;
@@ -61,13 +57,21 @@ struct comms{
 
 } comms;
 
+//Universal Variables
+long int currentMillis;
+long int previousMillis;
+int sampleInterval = 1000; // Sample interval in ms 
 
+long int currentMillis_temp;
+long int previousMillis_temp;
+int sampleInterval_temp = 200; // Sample interval in ms 
 
 
 void setup() {
+  Wire.begin();
   Serial.begin(9600);
   delay(2000);
-
+  Serial.println();
 
   pixels.begin(); // INITIALIZE NeoPixel strip object (REQUIRED)
 
@@ -75,7 +79,9 @@ void setup() {
   pixels.setPixelColor(0, pixels.Color(0, 0, 0)); // R G B
   pixels.show();
 
-  Serial.println();
+  Serial.println("Sensor Check");
+  SensorCheck();
+
   Serial.println("Calibrating thermistors \t");
   analogReadResolution(16);
   
@@ -83,10 +89,14 @@ void setup() {
   calibrateThermistor();
   
 
-
 } // END of setup()
 
 void loop() {
+
+  // Will also include modes of operation
+
+
+
   currentMillis = millis();
   currentMillis_temp = currentMillis;
   
@@ -94,18 +104,74 @@ void loop() {
   // Takes a temperature reading every 200 ms
   if ( (currentMillis_temp - previousMillis_temp) > sampleInterval_temp ){
     temperature();
+    previousMillis_temp = currentMillis_temp;
+
+    //current temp is 200ms - may have all sensors in this
+    OBC_Power();
+    obc.TCN75_Temp = termometro.readTemperature();
+
   }
   
 
   // Display data every second - the real data is measured and saved faster, but only displays the data once a second
   //and dipalsy the latest value of the data at that time
   if ( (currentMillis - previousMillis) > sampleInterval ){
-  Serial.print(obc.T0);Serial.print("\t");Serial.println(obc.T);
-
+    Serial.print(obc.count);Serial.print(",");
+    Serial.print(obc.T);Serial.print(",");
+    Serial.print(obc.TCN75_Temp);Serial.print(",");
+    Serial.print(obc.bus_Voltage);Serial.print(",");
+    Serial.print(obc.bus_Current);Serial.print(",");
+    Serial.print(obc.bus_Power);
+    Serial.println();
+    previousMillis = currentMillis;
   }
 
 
 } // END of Loop()
+
+
+void SensorCheck(){
+  
+  if (!ina260.begin()) {
+    Serial.println("Couldn't find INA260 chip");
+    pixels.clear();
+    pixels.setPixelColor(0, pixels.Color(150, 0, 0)); // R G B
+    pixels.show();
+    while (1);
+  }
+  Serial.println("Found INA260 chip");
+  pixels.clear();
+  pixels.setPixelColor(0, pixels.Color(0, 150, 0)); // R G B
+  pixels.show();
+  delay(100);
+
+  pixels.clear();
+  pixels.setPixelColor(0, pixels.Color(0, 0, 0)); // R G B
+  pixels.show();
+
+  Serial.println();
+  Serial.print("Current config = ");
+  Serial.println(termometro.readConfig(), BIN);
+  Serial.print("Current histeresys = ");
+  Serial.println(termometro.readHisteresys());
+  Serial.print("Current setpoint = ");
+  Serial.println(termometro.readSetPoint());
+  pixels.clear();
+  pixels.setPixelColor(0, pixels.Color(0, 150, 0)); // R G B
+  pixels.show();
+  delay(100);
+
+  pixels.clear();
+  pixels.setPixelColor(0, pixels.Color(0, 0, 0)); // R G B
+  pixels.show();
+
+
+
+}
+
+
+
+
 
 void calibrateThermistor(){
 
@@ -139,19 +205,12 @@ void temperature(){
   
   tKelvin = (BETA * obc.T0) / (BETA + (obc.T0 * log(obc.R0/ obc.R )));
   obc.T = tKelvin - 273.15;
-  Serial.println(obc.T);
-  
+
   // /2 reactive to 0.5 oC, /10 reactive to 0.5 oC
   //float rounded_tCelcius = (round(obc.T * 10)) ;/// 10;
   float rounded_tCelcius = (round(obc.T * 2)) /2 ;/// 10;
   //float rounded_T0 = (round((T0 - 273.15) * 10));// / 10;
   float rounded_T0 = (round((T0 - 273.15) * 2)) / 2;// / 10;
-
-
-  Serial.println();
-  Serial.println(rounded_tCelcius);
-  Serial.println(rounded_T0);
-  Serial.println();
   short int deltaT = rounded_tCelcius - rounded_T0;
 
   if (deltaT > 0){
@@ -175,3 +234,10 @@ void temperature(){
   }
 
 } // END of temperature()
+
+void OBC_Power(){
+  obc.bus_Voltage = ina260.readBusVoltage();  // mV
+  obc.bus_Current = ina260.readCurrent();     // mA
+  obc.bus_Power = ina260.readPower();         //mW
+
+}
