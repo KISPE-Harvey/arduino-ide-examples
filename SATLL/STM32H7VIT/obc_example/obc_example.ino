@@ -7,6 +7,9 @@
 
 
 // Libraries
+#include <SPI.h>
+#define PL_en PE2
+
 #include <Adafruit_NeoPixel.h>
 
 #include <Adafruit_INA260.h>
@@ -14,8 +17,20 @@ Adafruit_INA260 ina260 = Adafruit_INA260();
 
 #include "tcn75.h"
 #define tcn75address 0x4F // with pins 5~7 set to GND, the device address is 0x48
-
 tcn75 termometro(tcn75address);
+
+#include <ArduCAM.h>
+//SDA SCL
+TwoWire Wire2(PB7,PB6);
+
+#include <ACANFD_STM32.h>
+#define CAN1_TX_PIN PD_1
+#define CAN1_RX_PIN PD_0
+static const uint32_t FDCAN1_MESSAGE_RAM_WORD_SIZE = 2560 ;
+static const uint32_t FDCAN2_MESSAGE_RAM_WORD_SIZE = 0 ; // FDCAN2 not used
+static ACANFD_STM32_FIFO gBuffer ;
+
+
 
 //start spi/ create a void to enable spi
 //KISPE library
@@ -69,9 +84,15 @@ int sampleInterval_temp = 200; // Sample interval in ms
 
 void setup() {
   Wire.begin();
+  Wire2.begin();
+  gBuffer.initWithSize(100);
   Serial.begin(9600);
   delay(2000);
   Serial.println();
+
+  ACANFD_STM32_Settings settings (1000 * 1000, DataBitRateFactor::x4) ;
+  settings.mModuleMode = ACANFD_STM32_Settings::NORMAL_FD; // Found in CANFDMessage.h lines 53 - 58
+
 
   pixels.begin(); // INITIALIZE NeoPixel strip object (REQUIRED)
 
@@ -123,6 +144,7 @@ void loop() {
     Serial.print(obc.bus_Current);Serial.print(",");
     Serial.print(obc.bus_Power);
     Serial.println();
+    obc.count++;
     previousMillis = currentMillis;
   }
 
