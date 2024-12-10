@@ -258,7 +258,7 @@ void temperature(){
 } // END of temperature()
 
 void OBC_Power(){
-  obc.bus_Voltage = ina260.readBusVoltage();  // mV
+  obc.bus_Voltage = ina260.readBusVoltage() / 1000;  // mV
   obc.bus_Current = ina260.readCurrent();     // mA
   obc.bus_Power = ina260.readPower();         //mW
 

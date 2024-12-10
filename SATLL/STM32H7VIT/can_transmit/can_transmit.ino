@@ -16,8 +16,14 @@
 
   Last updated 16/08/2024 Harvey Nixon
 */
-#define CAN1_TX_PIN PA12
-#define CAN1_RX_PIN PA11
+// #define CAN1_TX_PIN PA12
+// #define CAN1_RX_PIN PA11
+#define CAN1_TX_PIN PD_1
+#define CAN1_RX_PIN PD_0
+
+// #define CAN1_TX_PIN PB9
+// #define CAN1_RX_PIN PB8
+// #define CE_CAN PB0
 
 // #define CAN2_TX_PIN PB13
 // #define CAN2_RX_PIN PB12
@@ -66,6 +72,9 @@ void floatToCharArray(float value, char* buffer, int bufferSize, int width, int 
 void setup() {
   gBuffer.initWithSize (100) ;
   //pinMode (LED_BUILTIN, OUTPUT) ;
+
+  // pinMode(CE_CAN, OUTPUT);
+  // digitalWrite(CE_CAN, HIGH);
   Serial.begin (115200);
   delay(2000);
   
@@ -82,8 +91,10 @@ void setup() {
   Serial.println("    CAN FD Transmit Example");
   delay(2000);
 
-  ACANFD_STM32_Settings settings (1000 * 1000, DataBitRateFactor::x4) ;
+  //ACANFD_STM32_Settings settings (1000 * 1000, DataBitRateFactor::x4) ;
+  ACANFD_STM32_Settings settings (250 * 1000, DataBitRateFactor::x1) ;
   settings.mModuleMode = ACANFD_STM32_Settings::NORMAL_FD; // Found in CANFDMessage.h lines 53 - 58
+
 
   const uint32_t errorCode = fdcan1.beginFD (settings) ;
   //const uint32_t errorCode = fdcan2.beginFD (settings) ;

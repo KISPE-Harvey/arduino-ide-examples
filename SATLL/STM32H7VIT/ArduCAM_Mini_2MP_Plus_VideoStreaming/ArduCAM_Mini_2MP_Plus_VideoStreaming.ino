@@ -66,7 +66,8 @@ void setup() {
   Wire.setSDA(PB7);
   Wire.setSCL(PB6);
   Wire.begin();
-  Serial.begin(921600);
+  //Serial.begin(921600);
+  Serial.begin(115200);
 #endif
   Serial.println(F("ACK CMD ArduCAM Start! END"));
 
