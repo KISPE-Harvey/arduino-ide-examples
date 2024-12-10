@@ -18,12 +18,12 @@
 */
 // #define CAN1_TX_PIN PA12
 // #define CAN1_RX_PIN PA11
-#define CAN1_TX_PIN PD_1
-#define CAN1_RX_PIN PD_0
+// #define CAN1_TX_PIN PD_1
+// #define CAN1_RX_PIN PD_0
 
-// #define CAN1_TX_PIN PB9
-// #define CAN1_RX_PIN PB8
-// #define CE_CAN PB0
+#define CAN1_TX_PIN PB9
+#define CAN1_RX_PIN PB8
+#define CE_CAN PB0
 
 // #define CAN2_TX_PIN PB13
 // #define CAN2_RX_PIN PB12
@@ -69,26 +69,31 @@ void floatToCharArray(float value, char* buffer, int bufferSize, int width, int 
   dtostrf(value, width, precision, buffer);
 }
 
+
+HardwareSerial Serial3(PD8, PD9);
+
 void setup() {
   gBuffer.initWithSize (100) ;
   //pinMode (LED_BUILTIN, OUTPUT) ;
 
-  // pinMode(CE_CAN, OUTPUT);
-  // digitalWrite(CE_CAN, HIGH);
-  Serial.begin (115200);
+  pinMode(CE_CAN, OUTPUT);
+  digitalWrite(CE_CAN, HIGH);
+  //Serial.begin (115200);
+  Serial3.begin (115200);
   delay(2000);
   
-  Serial.println("------------------------------------------------------------------------------");
-  Serial.println();
-  Serial.println("  _  _______  _____ _____  ______ ");
-  Serial.println(" | |/ /_   _|/ ____|  __ \\|  ____|");
-  Serial.println(" | ' /  | | | (___ | |__) | |__   ");
-  Serial.println(" |  <   | |  \\___ \\|  ___/|  __|  ");
-  Serial.println(" | . \\ _| |_ ____) | |    | |____ ");
-  Serial.println(" |_|\\_\\_____|_____/|_|    |______|");
-  Serial.println();
-  Serial.println("------------------------------------------------------------------------------");
-  Serial.println("    CAN FD Transmit Example");
+  // Serial.println("------------------------------------------------------------------------------");
+  // Serial.println();
+  // Serial.println("  _  _______  _____ _____  ______ ");
+  // Serial.println(" | |/ /_   _|/ ____|  __ \\|  ____|");
+  // Serial.println(" | ' /  | | | (___ | |__) | |__   ");
+  // Serial.println(" |  <   | |  \\___ \\|  ___/|  __|  ");
+  // Serial.println(" | . \\ _| |_ ____) | |    | |____ ");
+  // Serial.println(" |_|\\_\\_____|_____/|_|    |______|");
+  // Serial.println();
+  // Serial.println("------------------------------------------------------------------------------");
+  // Serial.println("    CAN FD Transmit Example");
+  Serial3.println("    CAN FD Transmit Example");
   delay(2000);
 
   //ACANFD_STM32_Settings settings (1000 * 1000, DataBitRateFactor::x4) ;
@@ -98,12 +103,12 @@ void setup() {
 
   const uint32_t errorCode = fdcan1.beginFD (settings) ;
   //const uint32_t errorCode = fdcan2.beginFD (settings) ;
- if (0 == errorCode) {
-    Serial.println ("can configuration ok") ;
-  }else{
-    Serial.print ("Error can configuration: 0x") ;
-    Serial.println (errorCode, HEX) ;
-  }
+//  if (0 == errorCode) {
+//     Serial.println ("can configuration ok") ;
+//   }else{
+//     Serial.print ("Error can configuration: 0x") ;
+//     Serial.println (errorCode, HEX) ;
+//   }
 
 }
 
@@ -157,22 +162,30 @@ void loop() {
 
 void data(){
   ++counter;
-  Serial.println("------------------------------------------------------------------------------");
-  Serial.print("Packet: ");Serial.println(counter);
-  Serial.print("Data Type: ");Serial.println(datatype);
+  // Serial.println("------------------------------------------------------------------------------");
+  // Serial.print("Packet: ");Serial.println(counter);
+  // Serial.print("Data Type: ");Serial.println(datatype);
+     Serial3.println("------------------------------------------------------------------------------");
+   Serial3.print("Packet: ");Serial3.println(counter);
+  Serial3.print("Data Type: ");Serial3.println(datatype);
+
 
   floatToCharArray(send_data, str_data, sizeof(str_data), 8, 6);
   for (int i = 0; i < 8 ; i++){
-    Serial.print(i);
-    Serial.print(" ");
-    Serial.println(str_data[i],HEX);
+    // Serial.print(i);
+    // Serial.print(" ");
+    // Serial.println(str_data[i],HEX);
+        Serial3.print(i);
+    Serial3.print(" ");
+    Serial3.println(str_data[i],HEX);
     }
 
 
   const uint8_t sendBufferIndex = 0 ;
   
   //--- Send frame
-  CANFDMessage frame ;
+  //CANFDMessage frame ;
+  CANMessage frame ;
 
   // set can frame data to all 0s
   for (uint32_t i=0 ; i<frame.len ; i++) {
@@ -181,19 +194,28 @@ void data(){
     // going to create a loop to send data
     }
   for (int i = 0; i < 8 ; i++){
-    Serial.print("Character ");
-    Serial.print(i);
-    Serial.print(": ");
-    Serial.println(str_data[i]);
+    // Serial.print("Character ");
+    // Serial.print(i);
+    // Serial.print(": ");
+    // Serial.println(str_data[i]);
+        Serial3.print("Character ");
+    Serial3.print(i);
+    Serial3.print(": ");
+    Serial3.println(str_data[i]);
 
     }
-  Serial.print("Data : ");
-  Serial.print("\t");
+  // Serial.print("Data : ");
+  // Serial.print("\t");
+    Serial3.print("Data : ");
+  Serial3.print("\t");
   for (int i = 0; i < 8 ; i++){
-    Serial.print(str_data[i]);
-    Serial.print("\t");
+    // Serial.print(str_data[i]);
+    // Serial.print("\t");
+        Serial3.print(str_data[i]);
+    Serial3.print("\t");
   }
-  Serial.println();
+  // Serial.println();
+  Serial3.println();
 
   // Layout the frame structure
   // ID, FRAMEs ETC
@@ -201,9 +223,10 @@ void data(){
   
   //   public : bool ext = false ; // false -> standard frame, true -> extended frame
   frame.ext = (0) ;
+  frame.rtr = (0);
 
   // state where is in and what it means
-  frame.type = CANFDMessage::Type (1);
+  //frame.type = CANFDMessage::Type (1);
   
     //frame.type = CANFDMessage::Type (r << 30) ;
     //frame.type = CANFDMessage::CANFD_NO_BIT_RATE_SWITCH  ;
@@ -218,8 +241,8 @@ void data(){
         gStandardFrameCount += 1 ;
         frame.id &= 0x7FFU ;
       }
-      switch (frame.type) {
-      case CANFDMessage::CAN_DATA :
+      // switch (frame.type) {
+      // case CANFDMessage::CAN_DATA :
         gCanDataFrameCount += 1 ;
         //frame.len = 8; // random number between 1 and 8 
         frame.len = sizeof(str_data);
@@ -228,43 +251,63 @@ void data(){
           // this is where the data is 
           // going to create a loop to send data
         }
-      break ;
-      }
+      // break ;
+      // }
 
   // print the CAN frame
-    Serial.print("Ascii: ");
+  //   Serial.print("Ascii: ");
+  //   for (int i = 0; i < frame.len; i++){
+  //     Serial.print(frame.data[i]);
+  //     Serial.print("\t");
+  //   }
+
+  // Serial.println();
+      Serial3.print("Ascii: ");
     for (int i = 0; i < frame.len; i++){
-      Serial.print(frame.data[i]);
-      Serial.print("\t");
+      Serial3.print(frame.data[i]);
+      Serial3.print("\t");
     }
 
-  Serial.println();
-  const uint32_t sendStatus = fdcan1.tryToSendReturnStatusFD (frame) ;  
+  Serial3.println();
+  //const uint32_t sendStatus = fdcan1.tryToSendReturnStatusFD (frame) ;  
   //const uint32_t sendStatus = fdcan2.tryToSendReturnStatusFD (frame) ; 
 
 
-  Serial.println();      
-  Serial.print("|---ID--|");Serial.print("|---LENGTH---|");Serial.println("|-------------------------DATA------------------------|");
-  Serial.print("   ");Serial.print(frame.id, HEX);Serial.print("\t");Serial.print("\t");Serial.print(frame.len);Serial.print("\t");
+  // Serial.println();      
+  // Serial.print("|---ID--|");Serial.print("|---LENGTH---|");Serial.println("|-------------------------DATA------------------------|");
+  // Serial.print("   ");Serial.print(frame.id, HEX);Serial.print("\t");Serial.print("\t");Serial.print(frame.len);Serial.print("\t");
+  // for (int i = 0; i < frame.len; i++){
+
+  //   Serial.print(frame.data[i]);
+  //   Serial.print("   ");
+  // }
+  // Serial.println();
+  // Serial.println("------------------------------------------------------------------------------");
+  // Serial.println(); 
+  
+  Serial3.println();      
+  Serial3.print("|---ID--|");Serial3.print("|---LENGTH---|");Serial3.println("|-------------------------DATA------------------------|");
+  Serial3.print("   ");Serial3.print(frame.id, HEX);Serial3.print("\t");Serial3.print("\t");Serial3.print(frame.len);Serial3.print("\t");
   for (int i = 0; i < frame.len; i++){
 
-    Serial.print(frame.data[i]);
-    Serial.print("   ");
+    Serial3.print(frame.data[i]);
+    Serial3.print("   ");
   }
-  Serial.println();
-  Serial.println("------------------------------------------------------------------------------");
-  Serial.println();  
+  Serial3.println();
+  Serial3.println("------------------------------------------------------------------------------");
+  Serial3.println();  
   
-  if (sendStatus == 0) {
-      gSentCount += 1 ;
-      Serial.print("SENT Packet:");Serial.println(counter);
-      Serial.println("------------------------------------------------------------------------------");
-    }else{
-      gOk = false ;
-      Serial.print ("Send status error 0x") ;
-      Serial.println (sendStatus, HEX) ;
-      Serial.println("------------------------------------------------------------------------------");
-    }
-  Serial.println();
+  // if (sendStatus == 0) {
+  //     gSentCount += 1 ;
+  //     Serial.print("SENT Packet:");Serial.println(counter);
+  //     Serial.println("------------------------------------------------------------------------------");
+  //   }else{
+  //     gOk = false ;
+  //     Serial.print ("Send status error 0x") ;
+  //     Serial.println (sendStatus, HEX) ;
+  //     Serial.println("------------------------------------------------------------------------------");
+  //   }
+  //Serial.println();
+  Serial3.println();
 
 } //end of data
